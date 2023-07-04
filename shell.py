@@ -1,9 +1,12 @@
 import aplfh
 while True:
-	text = input('aplfh > ')
+	text = input("aplfh > ")
+	if text.strip() == "": continue
 	result, error = aplfh.run('<stdin>', text)
-
-	if error: print(error.as_string())
-	elif result: print(repr(result))
-	if text == "exit()":
-		break
+	if error:
+		print(error.as_string())
+	elif result:
+		if len(result.elements) == 1:
+			print(repr(result.elements[0]))
+		else:
+			print(repr(result))

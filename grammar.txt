@@ -1,5 +1,10 @@
-expr        : KEYWORD: v IDENTIFIER EQ EXPR
-            : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
+statements  : NEWLINE* expr (NEWLΙΝΕ+ statements)* NEWLINE*
+statement   : KEYWorD:return expr?
+            : KEYWorD:continue
+            : KEYWorD:break
+            : expr
+expr        : KEYWorD: v IDENTIFIER EQ EXPR
+            : comp-expr ((KEYWorD:and|KEYWorD:or) comp-expr)*
 
 comp-expr   : NOT comp-expr
             : arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
@@ -23,17 +28,27 @@ atom        : INT|FLOAT|STRING|IDENTIFIER
             : while-expr
             : func-def
 list-expr   : LSQUARE (expr (COMMA expr)*)? RSQUARE
-if-expr     : KEYWORD:if expr KEYWORD KEYWORD:t expr
-              (KEYWORD:elif expr KEYWORD:THEN expr)*
-              (KEYWORD:else expr)?
+if-expr     : KEYWorD:if expr KEYWorD:t
+              (statement if-expr-b|if-expr-c?)
+            | (NEWLINE statements KEYWorD:end|if-expr-b|if-expr-c)  
+if-expr-b   : KEYWorD:elif expr KEYWorD:t
+              (statement if-expr-b|if-expr-c?)
+            | (NEWLINE statements KEYWorD:end|if-expr-b|if-expr-c)  
+if-expr-c   : KEYWorD:else
+              statement
+            | (NEWLINE statements KEYWorD:end)   
 
 
-for-expr    : KEYWORD:for IDENTIFIER EQ expr KEYWORD:to expr
-              (KEYWORD:step expr)? KEYWORD:t expr
+for-expr    : KEYWorD:for IDENTIFIER EQ expr KEYWorD:to expr
+              (KEYWorD:step expr)? KEYWorD:t
+              statement
+            | (NEWLINE statements KEYWorD:end) 
 
 
-while-expr  : KEYWORD:while expr KEYWORD:t expr
-
-func-def    : KEYWORD:f IDENTIFIER?
-              LPAREN (IDENTIFIER (COMMA IDENTIFER)*)? RPAREN
-              DO expr
+while-expr  : KEYWorD:while expr KEYWorD:t
+              statement
+            | (NEWLINE statements KEYWorD:end) 
+func-def    : KEYWorD:f IDENTIFIER?
+              LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+              (ARROW expr)
+            | (NEWLINE statements KEYWorD:end) 
