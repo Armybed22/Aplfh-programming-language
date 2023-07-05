@@ -1,0 +1,6 @@
+# LOX
+op("ponos")
+for i = 0 to 5 t
+  v a = 0
+  v a = a + i
+end

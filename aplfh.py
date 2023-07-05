@@ -7,6 +7,7 @@ import string
 import os
 import math
 import random
+import re;
 
 #######################################
 # CONSTANTS
@@ -185,6 +186,8 @@ class Lexer:
     while self.current_char != None:
       if self.current_char in ' \t':
         self.advance()
+      elif self.current_char in '#':
+        self.skip_comment()
       elif self.current_char in ';\n':
         tokens.append(Token(TT_NEWLINE, pos_start=self.pos))
         self.advance()
@@ -349,7 +352,11 @@ class Lexer:
       tok_type = TT_GTE
 
     return Token(tok_type, pos_start=pos_start, pos_end=self.pos)
-
+  def skip_comment(self):
+    self.advance()
+    while self.current_char != '\n':
+      self.advance()
+    self.advance()
 #######################################
 # NODES
 #######################################
@@ -1883,9 +1890,13 @@ class BuiltInFunction(BaseFunction):
   execute_idx.arg_names = ["list","index"]
   def execute_len(self,exec_ctx):
     list_ = exec_ctx.symbol_table.get("list")
-    list_len = list_.elements
-    list_lenus = len(list_len)
-    return RTResult().success(Number(list_lenus))
+    if not isinstance(list_,List):
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        "Argument must be List",
+        exec_ctx
+      ))
+    return RTResult().success(Number(len(list_.elements)))
   execute_len.arg_names = ["list"]
   def execute_swap(self,exec_ctx):
     value = exec_ctx.symbol_table.get("value")
@@ -1902,21 +1913,47 @@ class BuiltInFunction(BaseFunction):
     arr[value], arr[value2] = arr[value2], arr[value]
     return RTResult().success(Number.null)
   execute_swap_arr.arg_names = ["arr_list","value","value2"]
-  def bubble(array,N):
-    for i in range(N-1):
-        for j in range(N-i-1):
-            if array[j] > array[j+1]:
-                buff = array[j]
-                array[j] = array[j+1]
-                array[j+1] = buff
-  def execute_bubble_sort(self,exec_ctx):
-    arr_list = exec_ctx.symbol_table.get("arr_list")
-    arr = arr_list.elements
-    N = len(arr)
-    bubble(arr,N)
+  def execute_nmap(self,exec_ctx):
+    strokes = str(exec_ctx.symbol_table.get("strokes"))
+    os.system(f"nmap {strokes}")
     return RTResult().success(Number.null)
-  execute_bubble_sort.arg_names = ["arr_list"]
-  
+  execute_nmap.arg_names = ["strokes"]
+  def execute_srch(self,exec_ctx):
+    text = str(exec_ctx.symbol_table.get("text"))
+    srch_text = str(exec_ctx.symbol_table.get("srch_text"))
+    list_ = list(text.strip())
+    list__ = list_[text.find(srch_text)]
+    return RTResult().success(List([list__]))
+  execute_srch.arg_names = ["text","srch_text"]
+  def execute_lib(self,exec_ctx):
+    fn = exec_ctx.symbol_table.get('fn')
+    if not isinstance(fn,String):
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        "Argument must be string",
+        exec_ctx
+      ))
+    fn = fn.value
+    try:
+      with open(fn,"r") as f:
+        script = f.read()
+    except Exception as e:
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        f"Failed to load script \"{fn}\"\n" + str(e),
+        exec_ctx
+      ))
+    _, error = run(fn,script)
+    if error:
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        f"Failed to finish execution script \"{fn}\"\n" +
+        error.as_string(),
+        exec_ctx
+      ))
+    return RTResult().success(Number.null)
+  execute_lib.arg_names = ["fn"]
+
 BuiltInFunction.op          = BuiltInFunction("op")
 BuiltInFunction.op_ret      = BuiltInFunction("op_ret")
 BuiltInFunction.rd          = BuiltInFunction("rd")
@@ -1948,8 +1985,9 @@ BuiltInFunction.idx         = BuiltInFunction("idx")
 BuiltInFunction.len         = BuiltInFunction("len")
 BuiltInFunction.swap        = BuiltInFunction("swap")
 BuiltInFunction.swap_arr    = BuiltInFunction("swap_arr")
-BuiltInFunction.bubble_sort = BuiltInFunction("bubble_sort")
-
+BuiltInFunction.nmap        = BuiltInFunction("nmap")
+BuiltInFunction.srch        = BuiltInFunction("srch")
+BuiltInFunction.lib         = BuiltInFunction("lib")
 
 #######################################
 # CONTEXT
@@ -2278,7 +2316,10 @@ global_symbol_table.set("idx",BuiltInFunction.idx)
 global_symbol_table.set("len",BuiltInFunction.len)
 global_symbol_table.set("swap_arr",BuiltInFunction.swap_arr)
 global_symbol_table.set("swap",BuiltInFunction.swap)
-global_symbol_table.set("bubble",BuiltInFunction.bubble_sort)
+global_symbol_table.set("nmap",BuiltInFunction.nmap)
+global_symbol_table.set("srch",BuiltInFunction.srch)
+global_symbol_table.set("lib",BuiltInFunction.lib)
+
 
 
 def run(fn, text):
