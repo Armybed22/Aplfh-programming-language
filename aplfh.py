@@ -2,13 +2,13 @@
 # IMPORTS
 #######################################
 from string_with_arrows import *
-
 import string
 import os
 import math
 import random
 import re;
-
+import tkinter as ttk
+import requests
 #######################################
 # CONSTANTS
 #######################################
@@ -1953,6 +1953,214 @@ class BuiltInFunction(BaseFunction):
       ))
     return RTResult().success(Number.null)
   execute_lib.arg_names = ["fn"]
+  def execute_read(self,exec_ctx):
+    file = exec_ctx.symbol_table.get("file")
+    if not isinstance(file,String):
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        "Argument must be string",
+        exec_ctx
+      ))
+    file = file.value
+    try:
+      with open(file,"r") as f:
+        text = f.read()
+    except Exception as e:
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        f"Failed to load file \"{file}\"\n" + str(e),
+        exec_ctx
+      ))
+    print(text)
+    return RTResult().success(Number.null)
+  execute_read.arg_names = ["file"]
+  def execute_write(self,exec_ctx):
+    file = (exec_ctx.symbol_table.get("file"))
+    text = (exec_ctx.symbol_table.get("text"))
+    if not isinstance(file,String):
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        "Argument must be string",
+        exec_ctx
+      ))
+    file = file.value
+    try: 
+      with open(file,"w") as f:
+        f.write(str(text))
+    except Exception as e:
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        f"Failed to write file \"{file}\"\n" + str(e),
+        exec_ctx
+      ))
+    return RTResult().success(Number.null)
+  execute_write.arg_names = ["file","text"]
+  def execute_ui(self,exec_ctx):
+    text = str(exec_ctx.symbol_table.get("text"))
+    root = Tk()
+    frm = ttk.Frame(root, padding=10)
+    frm.grid()
+    ttk.Label(frm, text=text).grid(column=0, row=0)
+    ttk.Button(frm, text="Quit", command=root.destroy).grid(column=1, row=0)
+    root.mainloop()
+    return RTResult().success(Number.null)
+  execute_ui.arg_names = ["text"]
+  def execute_dirb(self,exec_ctx):
+    strokes = str(exec_ctx.symbol_table.get("strokes"))
+    os.system(f"dirb {strokes}")
+    return RTResult().success(Number.null)
+  execute_dirb.arg_names = ["strokes"]
+  def execute_pris(self,exec_ctx):
+    list_ = (exec_ctx.symbol_table.get("list"))
+    index = int(str(exec_ctx.symbol_table.get("index")))
+    index_zam = exec_ctx.symbol_table.get("index_zam")
+    list__ = list_.elements
+    if not isinstance(list_,List):
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        "Argument must be list",
+        exec_ctx
+      ))
+    list__[index] = index_zam
+    return RTResult().success(Number.null)
+  execute_pris.arg_names = ["list","index","index_zam"]
+  def execute_floor(self, exec_ctx):
+    value = float(str(exec_ctx.symbol_table.get("value")))
+    return RTResult().success(Number(math.floor(value)))
+  execute_floor.arg_names = ["value"]
+  def execute_log2(self,exec_ctx):
+    value = (exec_ctx.symbol_table.get("value"))
+    value_str = str(value)
+    value_int = float(value_str)
+    return RTResult().success(Number(math.log2(value_int)))
+  execute_log2.arg_names = ["value"]
+  def execute_log(self,exec_ctx):
+    value = (exec_ctx.symbol_table.get("value"))
+    value_str = str(value)
+    value_int = float(value_str)
+    value2 = (exec_ctx.symbol_table.get("value2"))
+    value_str2 = str(value2)
+    value_int2 = float(value_str2)
+    try:
+      return RTResult().success(Number(math.log(value_int,value_int2)))
+    except ZeroDivisionError as e:
+      return RTResult().failure(RTError(
+        self.pos_start,self.pos_end,
+        f"Zero Division Error",
+        exec_ctx
+      ))
+    
+  execute_log.arg_names = ["value","value2"]
+  def execute_log10(self,exec_ctx):
+    value = (exec_ctx.symbol_table.get("value"))
+    value_str = str(value)
+    value_int = float(value_str)
+    return RTResult().success(Number(math.log10((value_int))))
+  execute_log10.arg_names = ["value"]
+  def execute_log1p(self,exec_ctx):
+    value = (exec_ctx.symbol_table.get("value"))
+    value_str = str(value)
+    value_int = float(value_str)
+    return RTResult().success(Number(math.log1p(math.log1p(value_int))))
+  execute_log1p.arg_names = ["value"]
+
+  def execute_requests(self,exec_ctx):
+    value1 = str(exec_ctx.symbol_table.get("value1"))
+    site = str(exec_ctx.symbol_table.get("site"))
+    value3 = str(exec_ctx.symbol_table.get("value3"))
+    try:
+      if value1 == 'get' and value3 == 'url':
+        r = requests.get(site)
+        return RTResult().success(String((r,r.url)))
+      if value1 == 'get' and value3 == 'text':
+        r = requests.get(site)
+        return RTResult().success(String((r, r.text)))
+      if value1 == 'get' and value3 == 'encoding':
+        r = requests.get(site)
+        return RTResult().success(String((r,r.encoding)))
+      if value1 == 'get' and value3 == 'content':
+        r = requests.get(site)
+        return RTResult().success(String((r, r.content)))
+      if value1 == 'get' and value3 == 'url':
+        r = requests.get(site)
+        return RTResult().success(String(r.url))
+      if value1 == 'get' and value3 == 'json':
+        r = requests.get(site)
+        return RTResult().success(String((r, r.json)))
+      if value1 == 'get' and value3 == 'raw':
+        r = requests.get(site)
+        return RTResult().success(String((r, r.raw)))
+      if value1 == 'delete' and value3 == 'url':
+        r = requests.delete(site)
+        return RTResult().success(String((r,r.url)))
+      if value1 == 'delete' and value3 == 'text':
+        r = requests.delete(site)
+        return RTResult().success(String((r, r.text)))
+      if value1 == 'delete' and value3 == 'encoding':
+        r = requests.delete(site)
+        return RTResult().success(String((r,r.encoding)))
+      if value1 == 'delete' and value3 == 'content':
+        r = requests.delete(site)
+        return RTResult().success(String((r, r.content)))
+      if value1 == 'delete' and value3 == 'url':
+        r = requests.delete(site)
+        return RTResult().success(String(r.url))
+      if value1 == 'delete' and value3 == 'json':
+        r = requests.delete(site)
+        return RTResult().success(String((r, r.json)))
+      if value1 == 'delete' and value3 == 'raw':
+        r = requests.delete(site)
+        return RTResult().success(String((r, r.raw)))
+      if value1 == 'head' and value3 == 'url':
+        r = requests.head(site)
+        return RTResult().success(String((r,r.url)))
+      if value1 == 'head' and value3 == 'text':
+        r = requests.head(site)
+        return RTResult().success(String((r, r.text)))
+      if value1 == 'head' and value3 == 'encoding':
+        r = requests.head(site)
+        return RTResult().success(String((r,r.encoding)))
+      if value1 == 'head' and value3 == 'content':
+        r = requests.head(site)
+        return RTResult().success(String((r, r.content)))
+      if value1 == 'head' and value3 == 'url':
+        r = requests.head(site)
+        return RTResult().success(String(r.url))
+      if value1 == 'head' and value3 == 'json':
+        r = requests.head(site)
+        return RTResult().success(String((r, r.json)))
+      if value1 == 'head' and value3 == 'raw':
+        r = requests.head(site)
+        return RTResult().success(String((r, r.raw)))
+      if value1 == 'options' and value3 == 'url':
+        r = requests.options(site)
+        return RTResult().success(String((r,r.url)))
+      if value1 == 'options' and value3 == 'text':
+        r = requests.options(site)
+        return RTResult().success(String((r, r.text)))
+      if value1 == 'options' and value3 == 'encoding':
+        r = requests.options(site)
+        return RTResult().success(String((r,r.encoding)))
+      if value1 == 'options' and value3 == 'content':
+        r = requests.options(site)
+        return RTResult().success(String((r, r.content)))
+      if value1 == 'options' and value3 == 'url':
+        r = requests.options(site)
+        return RTResult().success(String(r.url))
+      if value1 == 'options' and value3 == 'json':
+        r = requests.options(site)
+        return RTResult().success(String((r, r.json)))
+      if value1 == 'options' and value3 == 'raw':
+        r = requests.options(site)
+        return RTResult().success(String((r, r.raw)))
+    except Exception as e:
+      return RTResult().failure(RTError(
+        self.pos_start, self.pos_end,
+        f"Wrong argument/s" + str(e),
+        exec_ctx
+      ))
+    return RTResult().success(Number.null)
+  execute_requests.arg_names = ["value1", "site", "value3"]
 
 BuiltInFunction.op          = BuiltInFunction("op")
 BuiltInFunction.op_ret      = BuiltInFunction("op_ret")
@@ -1988,6 +2196,18 @@ BuiltInFunction.swap_arr    = BuiltInFunction("swap_arr")
 BuiltInFunction.nmap        = BuiltInFunction("nmap")
 BuiltInFunction.srch        = BuiltInFunction("srch")
 BuiltInFunction.lib         = BuiltInFunction("lib")
+BuiltInFunction.read        = BuiltInFunction("read")
+BuiltInFunction.write       = BuiltInFunction("write")
+BuiltInFunction.ui          = BuiltInFunction("ui")
+BuiltInFunction.dirb        = BuiltInFunction("dirb")
+BuiltInFunction.pris        = BuiltInFunction("pris")
+BuiltInFunction.floor       = BuiltInFunction("floor")
+BuiltInFunction.log2        = BuiltInFunction("log2")
+BuiltInFunction.log         = BuiltInFunction("log")
+BuiltInFunction.log10       = BuiltInFunction("log10")
+BuiltInFunction.log1p       = BuiltInFunction("log1p")
+BuiltInFunction.requests    = BuiltInFunction("requests")
+
 
 #######################################
 # CONTEXT
@@ -2319,8 +2539,17 @@ global_symbol_table.set("swap",BuiltInFunction.swap)
 global_symbol_table.set("nmap",BuiltInFunction.nmap)
 global_symbol_table.set("srch",BuiltInFunction.srch)
 global_symbol_table.set("lib",BuiltInFunction.lib)
-
-
+global_symbol_table.set("read",BuiltInFunction.read)
+global_symbol_table.set("write",BuiltInFunction.write)
+global_symbol_table.set("ui",BuiltInFunction.ui)
+global_symbol_table.set("dirb",BuiltInFunction.dirb)
+global_symbol_table.set("pris",BuiltInFunction.pris)
+global_symbol_table.set("floor",BuiltInFunction.floor)
+global_symbol_table.set("log2",BuiltInFunction.log2)
+global_symbol_table.set("log",BuiltInFunction.log)
+global_symbol_table.set("log10",BuiltInFunction.log10)
+global_symbol_table.set("log1p",BuiltInFunction.log1p)
+global_symbol_table.set("req", BuiltInFunction.requests)
 
 def run(fn, text):
   # Generate tokens
