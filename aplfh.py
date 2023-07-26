@@ -2161,7 +2161,16 @@ class BuiltInFunction(BaseFunction):
       ))
     return RTResult().success(Number.null)
   execute_requests.arg_names = ["value1", "site", "value3"]
-
+  def execute_hydra(self,exec_ctx):
+    strokes = str(exec_ctx.symbol_table.get("strokes"))
+    os.system(f"hydra {strokes}")
+    return RTResult().success(Number.null)
+  execute_hydra.arg_names = ["strokes"]
+  def execute_medusa(self,exec_ctx):
+    strokes = str(exec_ctx.symbol_table.get("strokes"))
+    os.system(f"medusa {strokes}")
+    return RTResult().success(Number.null)
+  execute_medusa.arg_names = ["strokes"]
 BuiltInFunction.op          = BuiltInFunction("op")
 BuiltInFunction.op_ret      = BuiltInFunction("op_ret")
 BuiltInFunction.rd          = BuiltInFunction("rd")
@@ -2207,6 +2216,8 @@ BuiltInFunction.log         = BuiltInFunction("log")
 BuiltInFunction.log10       = BuiltInFunction("log10")
 BuiltInFunction.log1p       = BuiltInFunction("log1p")
 BuiltInFunction.requests    = BuiltInFunction("requests")
+BuiltInFunction.hydra       = BuiltInFunction("hydra")
+BuiltInFunction.medusa      = BuiltInFunction("medusa")
 
 
 #######################################
@@ -2550,6 +2561,8 @@ global_symbol_table.set("log",BuiltInFunction.log)
 global_symbol_table.set("log10",BuiltInFunction.log10)
 global_symbol_table.set("log1p",BuiltInFunction.log1p)
 global_symbol_table.set("req", BuiltInFunction.requests)
+global_symbol_table.set("hydra", BuiltInFunction.hydra)
+global_symbol_table.set("medusa", BuiltInFunction.medusa)
 
 def run(fn, text):
   # Generate tokens

@@ -9,7 +9,7 @@ f fib(n)
   return idx(data,n-1)
 end
 f rotd(a, b)
-  v q = a/b
+  v q = floor(a/b)
   
   v rotd = (a-q*b)
   return rotd
@@ -32,3 +32,11 @@ f proiz(a, b)
   end
   return proiz
 end
+f srez(arr,a,b)
+  v q = []
+  for i = a to b t
+     v q = q + i
+  end
+  return q
+end
+    

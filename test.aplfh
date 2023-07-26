@@ -1,1 +1,6 @@
-f test() -> op("Hello")
+f lol(site)
+    v q = []
+    v q = q + dirb(site)
+    v r = req(get,q,json)
+    return r
+end
