@@ -7,7 +7,11 @@ import os
 import math
 import random
 import re;
-import tkinter as ttk
+try:
+	import tkinter as ttk
+except:
+	pass
+
 import requests
 #######################################
 # CONSTANTS
