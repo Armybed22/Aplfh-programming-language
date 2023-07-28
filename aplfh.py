@@ -8,7 +8,8 @@ import math
 import random
 import re;
 try:
-	import tkinter as ttk
+  from tkinter import *
+  from tkinter import ttk
 except:
 	pass
 
