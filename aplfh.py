@@ -1779,8 +1779,8 @@ class BuiltInFunction(BaseFunction):
     value_int = float(str(value))
     return RTResult().success(Number(math.sqrt(value_int)))
   execute_sqrt.arg_names = ["value"]
-  def execute_fact(self,exec_ctx):
-    value = (exec_ctx.symbol_table.get("value"))
+  def execute_fact(self, exec_ctx):
+        value = (exec_ctx.symbol_table.get("value"))
         value_int = float(str(value))
         if value_int < 0:
             return RTResult.failure(RTError(
