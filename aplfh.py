@@ -1781,9 +1781,21 @@ class BuiltInFunction(BaseFunction):
   execute_sqrt.arg_names = ["value"]
   def execute_fact(self,exec_ctx):
     value = (exec_ctx.symbol_table.get("value"))
-    value_int = float(str(value))
-    return RTResult().success(Number(math.factorial(value_int)))
-  execute_fact.arg_names = ["value"]
+        value_int = float(str(value))
+        if value_int < 0:
+            return RTResult.failure(RTError(
+                self.pos_start, self.pos_end,
+                "The factorial is defined only for non-negative integers",
+                exec_ctx
+            ))
+        result = 1.0
+        while value_int > 1:
+            result *= value_int
+            value_int -= 1
+    
+        return RTResult().success(Number(result))
+    execute_fact.arg_names = ["value"]
+
   def execute_is_num(self, exec_ctx):
     is_number = isinstance(exec_ctx.symbol_table.get("value"), Number)
     return RTResult().success(Number.true if is_number else Number.false)
