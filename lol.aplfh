@@ -1,7 +1,0 @@
-v a = 0
-v d = false
-
-if a == 1 t 
-    v d = true
-else
-    v d = false

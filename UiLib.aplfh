@@ -1,0 +1,33 @@
+f ui_noClose(text)
+    while true t
+        ui(text)
+    end
+end
+
+
+f ui_end_program()
+    ui("End of program. Press quit for exit.")
+    sin("exit")
+end
+
+
+f ui_log(log_string)
+    ui("Log: " + log_string)
+end
+
+
+f ui_error(error_string)
+    ui("Error: " + error_string)
+end
+
+
+f multi_click(number, text)
+    for i = 0 to number t
+        ui(text + " " + str(number - i))
+    end
+end
+
+
+f ui_commandList()
+    ui("functions:   ui_noClose(text);   ui_end_program();   ui_log(text);   ui_error(text);   multi_click(number, text)")
+end
